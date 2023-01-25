@@ -7,13 +7,13 @@ set(CMAKE_DEPENDS_GENERATOR "Unix Makefiles")
 # The top level Makefile was generated from the following files:
 set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
-  "../../CMakeLists.txt"
   "CMakeFiles/3.22.1/CMakeCCompiler.cmake"
   "CMakeFiles/3.22.1/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.22.1/CMakeSystem.cmake"
   "ament_cmake_core/package.cmake"
   "ament_cmake_package_templates/templates.cmake"
-  "../../package.xml"
+  "/home/samueljadzak/capstone/restart_ws/src/articubot_one/CMakeLists.txt"
+  "/home/samueljadzak/capstone/restart_ws/src/articubot_one/package.xml"
   "/opt/ros/humble/lib/python3.10/site-packages/ament_package/template/package_level/local_setup.bash.in"
   "/opt/ros/humble/lib/python3.10/site-packages/ament_package/template/package_level/local_setup.sh.in"
   "/opt/ros/humble/lib/python3.10/site-packages/ament_package/template/package_level/local_setup.zsh.in"

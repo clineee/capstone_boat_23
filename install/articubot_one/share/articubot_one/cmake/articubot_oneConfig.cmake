@@ -1,1 +1,1 @@
-/home/samueljadzak/capstone/articubot_one/build/articubot_one/ament_cmake_core/articubot_oneConfig.cmake
+/home/samueljadzak/capstone/restart_ws/build/articubot_one/ament_cmake_core/articubot_oneConfig.cmake

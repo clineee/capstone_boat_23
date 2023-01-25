@@ -1,1 +1,1 @@
-/home/samueljadzak/capstone/articubot_one/launch/launch_robot.launch.py
+/home/samueljadzak/capstone/restart_ws/src/articubot_one/launch/launch_robot.launch.py

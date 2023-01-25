@@ -1,1 +1,1 @@
-/home/samueljadzak/capstone/articubot_one/build/articubot_one/ament_cmake_environment_hooks/local_setup.sh
+/home/samueljadzak/capstone/restart_ws/build/articubot_one/ament_cmake_environment_hooks/local_setup.sh
