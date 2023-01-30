@@ -1,0 +1,2 @@
+Invoking command in '/home/samueljadzak/capstone/restart_ws/capstone_boat_23/build/articubot_one': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/samueljadzak/capstone/restart_ws/capstone_boat_23/build/articubot_one -- -j12 -l12
+Invoked command in '/home/samueljadzak/capstone/restart_ws/capstone_boat_23/build/articubot_one' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/samueljadzak/capstone/restart_ws/capstone_boat_23/build/articubot_one -- -j12 -l12
