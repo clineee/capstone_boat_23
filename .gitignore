@@ -3,6 +3,10 @@ install/
 log/
 build/
 
+src/install/
+src/log/
+src/build/
+
 # Ignore generated docs
 *.dox
 *.wikidoc
@@ -10,6 +14,9 @@ build/
 # eclipse stuff
 .project
 .cproject
+
+# CLion
+.idea
 
 # qcreator stuff
 CMakeLists.txt.user

@@ -311,7 +311,7 @@ void MultipleObjectTrackingLidar::publish_cloud(rclcpp::Publisher<sensor_msgs::m
 
 void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::ConstPtr &input)
 {
-  // std::cout<<"IF firstFrame="<<firstFrame<<"\n";
+  std::cout<<"IF firstFrame="<<firstFrame<<"\n";
   // If this is the first frame, initialize kalman filters for the clustered
   // objects
   if (firstFrame) {
@@ -501,7 +501,7 @@ void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::
   }
 
   else {
-    // std::cout<<"ELSE firstFrame="<<firstFrame<<"\n";
+    std::cout<<"ELSE firstFrame="<<firstFrame<<"\n";
     pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(
         new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr clustered_cloud(
