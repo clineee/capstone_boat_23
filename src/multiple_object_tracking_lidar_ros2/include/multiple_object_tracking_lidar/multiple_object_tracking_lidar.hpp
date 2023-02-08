@@ -50,12 +50,8 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub;
     rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr markerPub;
     rclcpp::Publisher<std_msgs::msg::Int32MultiArray>::SharedPtr objID_pub;
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster0;
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster1;
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster2;
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster3;
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster4;
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster5;
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster_points;
+  	rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cluster_centroids;
 
     std::vector<geometry_msgs::msg::Point> prevClusterCenters;
 
@@ -74,7 +70,9 @@ private:
     void publish_cloud(rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr &pub, pcl::PointCloud<pcl::PointXYZ>::Ptr cluster);
     void cloud_cb(const sensor_msgs::msg::PointCloud2::ConstPtr &input);
 
-	void init_kfs();
+	void init_kfs(const std::vector<pcl::PointXYZ>& clusterCentroids);
+  	static cv::KalmanFilter init_kf(float x, float y);
+  	static std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> process_point_cloud(const sensor_msgs::msg::PointCloud2::ConstPtr& input);
 };
 
 }

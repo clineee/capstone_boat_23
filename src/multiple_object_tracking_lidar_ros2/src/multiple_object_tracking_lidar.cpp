@@ -46,12 +46,8 @@ MultipleObjectTrackingLidar::MultipleObjectTrackingLidar(const std::string& name
 
   // Create a ROS publisher for the output point cloud
   // TODO: vectorize as needed
-  pub_cluster0 = this->create_publisher<sensor_msgs::msg::PointCloud2>("cluster_0", 1);
-  pub_cluster1 = this->create_publisher<sensor_msgs::msg::PointCloud2>("cluster_1", 1);
-  pub_cluster2 = this->create_publisher<sensor_msgs::msg::PointCloud2>("cluster_2", 1);
-  pub_cluster3 = this->create_publisher<sensor_msgs::msg::PointCloud2>("cluster_3", 1);
-  pub_cluster4 = this->create_publisher<sensor_msgs::msg::PointCloud2>("cluster_4", 1);
-  pub_cluster5 = this->create_publisher<sensor_msgs::msg::PointCloud2>("cluster_5", 1);
+  pub_cluster_points= this->create_publisher<sensor_msgs::msg::PointCloud2>("cluster_points", 1);
+  pub_cluster_centroids = this->create_publisher<sensor_msgs::msg::PointCloud2>("cluster_centroids", 1);
 
   // Subscribe to the clustered pointclouds
   // rclcpp::Subscription<sensor_msgs::msg::PointCloud2> c1=this->create_subscription<sensor_msgs::msg::PointCloud2>("ccs", 100, kft);
@@ -279,7 +275,8 @@ void MultipleObjectTrackingLidar::publish_cloud(rclcpp::Publisher<sensor_msgs::m
 }
 
 
-void MultipleObjectTrackingLidar::init_kfs() {
+// initialize all of the matrices and input states for the KFs
+void MultipleObjectTrackingLidar::init_kfs(const std::vector<pcl::PointXYZ>& clusterCentroids) {
   // Initialize 6 Kalman Filters; Assuming 6 max objects in the dataset.
   // Could be made generic by creating a Kalman Filter only when a new object
   // is detected
@@ -291,17 +288,54 @@ void MultipleObjectTrackingLidar::init_kfs() {
   float sigmaP = 0.01;
   float sigmaQ = 0.1;
 
-  // initialize all kalman filter matricies
+  // initialize KF matrices and initial state
+  int i = 0;
   for(auto &kf : kalman_filters){
+	// Set matrices
 	kf.transitionMatrix = (cv::Mat_<float>(4, 4) << dx, 0, 1, 0, 0, dy, 0, 1, 0, 0, dvx, 0, 0, 0, 0, dvy);
 	cv::setIdentity(kf.measurementMatrix);
 	cv::setIdentity(kf.processNoiseCov, cv::Scalar::all(sigmaP));
 	cv::setIdentity(kf.measurementNoiseCov, cv::Scalar(sigmaQ));
+
+	// Set initial state
+	kf.statePre.at<float>(0) = clusterCentroids.at(i).x;
+	kf.statePre.at<float>(1) = clusterCentroids.at(i).y;
+	kf.statePre.at<float>(2) = 0; // initial v_x
+	kf.statePre.at<float>(3) = 0; // initial v_y
+
+	i++;
   }
 }
 
+
+// Initialize a single kalman filter -- to be called as needed as new clusters are found
+cv::KalmanFilter MultipleObjectTrackingLidar::init_kf(float x, float y) {
+  // KF constants
+  float dvx = 0.01f; // 1.0
+  float dvy = 0.01f; // 1.0
+  float dx = 1.0f;
+  float dy = 1.0f;
+  float sigmaP = 0.01;
+  float sigmaQ = 0.1;
+  cv::KalmanFilter kf;
+
+  // initialize KF matrices and initial state
+  kf.transitionMatrix = (cv::Mat_<float>(4, 4) << dx, 0, 1, 0, 0, dy, 0, 1, 0, 0, dvx, 0, 0, 0, 0, dvy);
+  cv::setIdentity(kf.measurementMatrix);
+  cv::setIdentity(kf.processNoiseCov, cv::Scalar::all(sigmaP));
+  cv::setIdentity(kf.measurementNoiseCov, cv::Scalar(sigmaQ));
+
+  // Set initial state
+  kf.statePre.at<float>(0) = x;
+  kf.statePre.at<float>(1) = y;
+  kf.statePre.at<float>(2) = 0; // initial v_x
+  kf.statePre.at<float>(3) = 0; // initial v_y
+
+  return kf;
+}
+
 // Process the point cloud
-void MultipleObjectTrackingLidar::process_point_cloud(){
+std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>  MultipleObjectTrackingLidar::process_point_cloud(const sensor_msgs::msg::PointCloud2::ConstPtr& input){
   // create placeholder objects
   pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::PointCloud<pcl::PointXYZ>::Ptr clustered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
@@ -321,215 +355,96 @@ void MultipleObjectTrackingLidar::process_point_cloud(){
   /* Extract the clusters out of pc and save indices in cluster_indices.*/
   ec.extract(cluster_indices);
 
-  std::vector<pcl::PointIndices>::const_iterator it;
-  std::vector<int>::const_iterator pit;
-  // Vector of cluster pointclouds
+  // Vector of cluster point clouds
   std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cluster_vec;
-  // Cluster centroids
+
+  // create a point cloud (reference) for each cluster
+  // first, iterate clusters
+  for(const auto& clusterIdx : cluster_indices){
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster(new pcl::PointCloud<pcl::PointXYZ>);
+
+	// now, iterate all points in cluster
+	for (auto pointIdx : clusterIdx.indices) {
+	  cloud_cluster->points.push_back(input_cloud->points[pointIdx]);
+	}
+
+	cluster_vec.push_back(cloud_cluster);
+  }
+
+  return cluster_vec;
+}
+
+
+// find the centroid for each cluster
+std::vector<pcl::PointXYZ> MultipleObjectTrackingLidar::findCentroids(std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cluster_vec){
+  // to store centroids...
   std::vector<pcl::PointXYZ> clusterCentroids;
 
-  for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
-
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster(
-		new pcl::PointCloud<pcl::PointXYZ>);
-	float x = 0.0;
-	float y = 0.0;
+  // iterate each cluster
+  for(const auto& cluster : cluster_vec){
+	float x = 0.0, y = 0.0, z = 0.0;
 	int numPts = 0;
-	for (pit = it->indices.begin(); pit != it->indices.end(); pit++) {
 
-	  cloud_cluster->points.push_back(input_cloud->points[*pit]);
-	  x += input_cloud->points[*pit].x;
-	  y += input_cloud->points[*pit].y;
+	// find centroid by averaging all points in cluster
+	for (auto point : cluster->points) {
+	  x += point.x;
+	  y += point.y;
+	  z += point.z;
 	  numPts++;
-
-	  // dist_this_point = pcl::geometry::distance(input_cloud->points[*pit],
-	  //                                          origin);
-	  // mindist_this_cluster = std::min(dist_this_point,
-	  // mindist_this_cluster);
 	}
 
 	pcl::PointXYZ centroid;
-	centroid.x = x / numPts;
-	centroid.y = y / numPts;
-	centroid.z = 0.0;
+	centroid.x = x / (float)numPts;
+	centroid.y = y / (float)numPts;
+	centroid.z = z / (float)numPts;
 
-	cluster_vec.push_back(cloud_cluster);
-
-	// Get the centroid of the cluster
 	clusterCentroids.push_back(centroid);
+  }
 
+  return clusterCentroids;
 }
 
 // callback for clustering ==> main processing function
 void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::ConstPtr &input)
 {
-  std::cout<<"IF firstFrame="<<firstFrame<<"\n";
-  // If this is the first frame, initialize kalman filters for the clustered
-  // objects
+  // separate input point cloud into clusters using KD-tree
+  auto cluster_vec = MultipleObjectTrackingLidar::process_point_cloud(input);
+
+  // find the centroid of the clusters
+  auto clusterCentroids = MultipleObjectTrackingLidar::findCentroids(cluster_vec);
+
+  // TODO: WIP -- create KFs as new objects are found
+  if(clusterCentroids.size() > kalman_filters.size()){
+	// init new KFs
+	for(int i = kalman_filters.size(); i < clusterCentroids.size(); i++){
+	  auto centroid = clusterCentroids.at(i);
+	  kalman_filters.push_back(init_kf(centroid.x, centroid.y));
+	}
+  } else if(clusterCentroids.size() < kalman_filters.size()){
+	// TODO: remove KFs corresponding to missing object
+  }
+
+
+  // Ensure at least 6 clusters exist to publish (later clusters may be empty)
+  // This creates empty clusters + centroids to publish when fewer than 6 objects are detected
+  while (cluster_vec.size() < 6) {
+	pcl::PointCloud<pcl::PointXYZ>::Ptr empty_cluster(new pcl::PointCloud<pcl::PointXYZ>);
+	empty_cluster->points.push_back(pcl::PointXYZ(0, 0, 0));
+	cluster_vec.push_back(empty_cluster);
+  }
+
+  while (clusterCentroids.size() < 6) {
+	pcl::PointXYZ centroid;
+	centroid.x = 0.0;
+	centroid.y = 0.0;
+	centroid.z = 0.0;
+
+	clusterCentroids.push_back(centroid);
+  }
+
+  // If this is the first frame, initialize kalman filters for the clustered objects
   if (firstFrame) {
-	// Initialize 6 Kalman Filters; Assuming 6 max objects in the dataset.
-	// Could be made generic by creating a Kalman Filter only when a new object
-	// is detected
-
-	float dvx = 0.01f; // 1.0
-	float dvy = 0.01f; // 1.0
-	float dx = 1.0f;
-	float dy = 1.0f;
-	KF0.transitionMatrix = (cv::Mat_<float>(4, 4) << dx, 0, 1, 0, 0, dy, 0, 1, 0, 0,
-		dvx, 0, 0, 0, 0, dvy);
-	KF1.transitionMatrix = (cv::Mat_<float>(4, 4) << dx, 0, 1, 0, 0, dy, 0, 1, 0, 0,
-		dvx, 0, 0, 0, 0, dvy);
-	KF2.transitionMatrix = (cv::Mat_<float>(4, 4) << dx, 0, 1, 0, 0, dy, 0, 1, 0, 0,
-		dvx, 0, 0, 0, 0, dvy);
-	KF3.transitionMatrix = (cv::Mat_<float>(4, 4) << dx, 0, 1, 0, 0, dy, 0, 1, 0, 0,
-		dvx, 0, 0, 0, 0, dvy);
-	KF4.transitionMatrix = (cv::Mat_<float>(4, 4) << dx, 0, 1, 0, 0, dy, 0, 1, 0, 0,
-		dvx, 0, 0, 0, 0, dvy);
-	KF5.transitionMatrix = (cv::Mat_<float>(4, 4) << dx, 0, 1, 0, 0, dy, 0, 1, 0, 0,
-		dvx, 0, 0, 0, 0, dvy);
-
-	cv::setIdentity(KF0.measurementMatrix);
-	cv::setIdentity(KF1.measurementMatrix);
-	cv::setIdentity(KF2.measurementMatrix);
-	cv::setIdentity(KF3.measurementMatrix);
-	cv::setIdentity(KF4.measurementMatrix);
-	cv::setIdentity(KF5.measurementMatrix);
-	// Process Noise Covariance Matrix Q
-	// [ Ex 0  0    0 0    0 ]
-	// [ 0  Ey 0    0 0    0 ]
-	// [ 0  0  Ev_x 0 0    0 ]
-	// [ 0  0  0    1 Ev_y 0 ]
-	// [ 0  0  0    0 1    Ew ]
-	// [ 0  0  0    0 0    Eh ]
-	float sigmaP = 0.01;
-	float sigmaQ = 0.1;
-	setIdentity(KF0.processNoiseCov, cv::Scalar::all(sigmaP));
-	setIdentity(KF1.processNoiseCov, cv::Scalar::all(sigmaP));
-	setIdentity(KF2.processNoiseCov, cv::Scalar::all(sigmaP));
-	setIdentity(KF3.processNoiseCov, cv::Scalar::all(sigmaP));
-	setIdentity(KF4.processNoiseCov, cv::Scalar::all(sigmaP));
-	setIdentity(KF5.processNoiseCov, cv::Scalar::all(sigmaP));
-	// Meas noise cov matrix R
-	cv::setIdentity(KF0.measurementNoiseCov, cv::Scalar(sigmaQ)); // 1e-1
-	cv::setIdentity(KF1.measurementNoiseCov, cv::Scalar(sigmaQ));
-	cv::setIdentity(KF2.measurementNoiseCov, cv::Scalar(sigmaQ));
-	cv::setIdentity(KF3.measurementNoiseCov, cv::Scalar(sigmaQ));
-	cv::setIdentity(KF4.measurementNoiseCov, cv::Scalar(sigmaQ));
-	cv::setIdentity(KF5.measurementNoiseCov, cv::Scalar(sigmaQ));
-
-	// Process the point cloud
-	pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(
-		new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr clustered_cloud(
-		new pcl::PointCloud<pcl::PointXYZ>);
-	/* Creating the KdTree from input point cloud*/
-	pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(
-		new pcl::search::KdTree<pcl::PointXYZ>);
-
-	pcl::fromROSMsg(*input, *input_cloud);
-
-	tree->setInputCloud(input_cloud);
-
-	std::vector<pcl::PointIndices> cluster_indices;
-	pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-	ec.setClusterTolerance(0.08);
-	ec.setMinClusterSize(10);
-	ec.setMaxClusterSize(600);
-	ec.setSearchMethod(tree);
-	ec.setInputCloud(input_cloud);
-	/* Extract the clusters out of pc and save indices in cluster_indices.*/
-	ec.extract(cluster_indices);
-
-	std::vector<pcl::PointIndices>::const_iterator it;
-	std::vector<int>::const_iterator pit;
-	// Vector of cluster pointclouds
-	std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cluster_vec;
-	// Cluster centroids
-	std::vector<pcl::PointXYZ> clusterCentroids;
-
-	for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
-
-	  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster(
-		  new pcl::PointCloud<pcl::PointXYZ>);
-	  float x = 0.0;
-	  float y = 0.0;
-	  int numPts = 0;
-	  for (pit = it->indices.begin(); pit != it->indices.end(); pit++) {
-
-		cloud_cluster->points.push_back(input_cloud->points[*pit]);
-		x += input_cloud->points[*pit].x;
-		y += input_cloud->points[*pit].y;
-		numPts++;
-
-		// dist_this_point = pcl::geometry::distance(input_cloud->points[*pit],
-		//                                          origin);
-		// mindist_this_cluster = std::min(dist_this_point,
-		// mindist_this_cluster);
-	  }
-
-	  pcl::PointXYZ centroid;
-	  centroid.x = x / numPts;
-	  centroid.y = y / numPts;
-	  centroid.z = 0.0;
-
-	  cluster_vec.push_back(cloud_cluster);
-
-	  // Get the centroid of the cluster
-	  clusterCentroids.push_back(centroid);
-	}
-
-	// Ensure at least 6 clusters exist to publish (later clusters may be empty)
-	while (cluster_vec.size() < 6) {
-	  pcl::PointCloud<pcl::PointXYZ>::Ptr empty_cluster(
-		  new pcl::PointCloud<pcl::PointXYZ>);
-	  empty_cluster->points.push_back(pcl::PointXYZ(0, 0, 0));
-	  cluster_vec.push_back(empty_cluster);
-	}
-
-	while (clusterCentroids.size() < 6) {
-	  pcl::PointXYZ centroid;
-	  centroid.x = 0.0;
-	  centroid.y = 0.0;
-	  centroid.z = 0.0;
-
-	  clusterCentroids.push_back(centroid);
-	}
-
-	// Set initial state
-	KF0.statePre.at<float>(0) = clusterCentroids.at(0).x;
-	KF0.statePre.at<float>(1) = clusterCentroids.at(0).y;
-	KF0.statePre.at<float>(2) = 0; // initial v_x
-	KF0.statePre.at<float>(3) = 0; // initial v_y
-
-	// Set initial state
-	KF1.statePre.at<float>(0) = clusterCentroids.at(1).x;
-	KF1.statePre.at<float>(1) = clusterCentroids.at(1).y;
-	KF1.statePre.at<float>(2) = 0; // initial v_x
-	KF1.statePre.at<float>(3) = 0; // initial v_y
-
-	// Set initial state
-	KF2.statePre.at<float>(0) = clusterCentroids.at(2).x;
-	KF2.statePre.at<float>(1) = clusterCentroids.at(2).y;
-	KF2.statePre.at<float>(2) = 0; // initial v_x
-	KF2.statePre.at<float>(3) = 0; // initial v_y
-
-	// Set initial state
-	KF3.statePre.at<float>(0) = clusterCentroids.at(3).x;
-	KF3.statePre.at<float>(1) = clusterCentroids.at(3).y;
-	KF3.statePre.at<float>(2) = 0; // initial v_x
-	KF3.statePre.at<float>(3) = 0; // initial v_y
-
-	// Set initial state
-	KF4.statePre.at<float>(0) = clusterCentroids.at(4).x;
-	KF4.statePre.at<float>(1) = clusterCentroids.at(4).y;
-	KF4.statePre.at<float>(2) = 0; // initial v_x
-	KF4.statePre.at<float>(3) = 0; // initial v_y
-
-	// Set initial state
-	KF5.statePre.at<float>(0) = clusterCentroids.at(5).x;
-	KF5.statePre.at<float>(1) = clusterCentroids.at(5).y;
-	KF5.statePre.at<float>(2) = 0; // initial v_x
-	KF5.statePre.at<float>(3) = 0; // initial v_y
+	MultipleObjectTrackingLidar::init_kfs(clusterCentroids);
 
 	firstFrame = false;
 
@@ -542,101 +457,6 @@ void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::
   }
 
   else {
-    std::cout<<"ELSE firstFrame="<<firstFrame<<"\n";
-    pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(
-        new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr clustered_cloud(
-        new pcl::PointCloud<pcl::PointXYZ>);
-    /* Creating the KdTree from input point cloud*/
-    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(
-        new pcl::search::KdTree<pcl::PointXYZ>);
-
-    pcl::fromROSMsg(*input, *input_cloud);
-
-    tree->setInputCloud(input_cloud);
-
-    /* Here we are creating a vector of PointIndices, which contains the actual
-     * index information in a vector<int>. The indices of each detected cluster
-     * are saved here. Cluster_indices is a vector containing one instance of
-     * PointIndices for each detected cluster. Cluster_indices[0] contain all
-     * indices of the first cluster in input point cloud.
-     */
-    std::vector<pcl::PointIndices> cluster_indices;
-    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-    ec.setClusterTolerance(0.08);
-    ec.setMinClusterSize(10);
-    ec.setMaxClusterSize(600);
-    ec.setSearchMethod(tree);
-    ec.setInputCloud(input_cloud);
-    // std::cout<<"PCL init successfull\n";
-    /* Extract the clusters out of pc and save indices in cluster_indices.*/
-    ec.extract(cluster_indices);
-    // std::cout<<"PCL extract successfull\n";
-    /* To separate each cluster out of the vector<PointIndices> we have to
-     * iterate through cluster_indices, create a new PointCloud for each
-     * entry and write all points of the current cluster in the PointCloud.
-     */
-    // pcl::PointXYZ origin (0,0,0);
-    // float mindist_this_cluster = 1000;
-    // float dist_this_point = 1000;
-
-    std::vector<pcl::PointIndices>::const_iterator it;
-    std::vector<int>::const_iterator pit;
-    // Vector of cluster pointclouds
-    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cluster_vec;
-
-    // Cluster centroids
-    std::vector<pcl::PointXYZ> clusterCentroids;
-
-    for (it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
-      float x = 0.0;
-      float y = 0.0;
-      int numPts = 0;
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster(
-          new pcl::PointCloud<pcl::PointXYZ>);
-      for (pit = it->indices.begin(); pit != it->indices.end(); pit++) {
-
-        cloud_cluster->points.push_back(input_cloud->points[*pit]);
-
-        x += input_cloud->points[*pit].x;
-        y += input_cloud->points[*pit].y;
-        numPts++;
-
-        // dist_this_point = pcl::geometry::distance(input_cloud->points[*pit],
-        //                                          origin);
-        // mindist_this_cluster = std::min(dist_this_point,
-        // mindist_this_cluster);
-      }
-
-      pcl::PointXYZ centroid;
-      centroid.x = x / numPts;
-      centroid.y = y / numPts;
-      centroid.z = 0.0;
-
-      cluster_vec.push_back(cloud_cluster);
-
-      // Get the centroid of the cluster
-      clusterCentroids.push_back(centroid);
-    }
-    // std::cout<<"cluster_vec got some clusters\n";
-
-    // Ensure at least 6 clusters exist to publish (later clusters may be empty)
-    while (cluster_vec.size() < 6) {
-      pcl::PointCloud<pcl::PointXYZ>::Ptr empty_cluster(
-          new pcl::PointCloud<pcl::PointXYZ>);
-      empty_cluster->points.push_back(pcl::PointXYZ(0, 0, 0));
-      cluster_vec.push_back(empty_cluster);
-    }
-
-    while (clusterCentroids.size() < 6) {
-      pcl::PointXYZ centroid;
-      centroid.x = 0.0;
-      centroid.y = 0.0;
-      centroid.z = 0.0;
-
-      clusterCentroids.push_back(centroid);
-    }
-
     std_msgs::msg::Float32MultiArray cc;
     for (int i = 0; i < 6; i++) {
       cc.data.push_back(clusterCentroids.at(i).x);
@@ -647,10 +467,11 @@ void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::
 
     // cc_pos.publish(cc);// Publish cluster mid-points.
     kft(cc);
+
+	// TODO: fix publishers
     int i = 0;
     bool publishedCluster[6];
-    for (auto it = objID.begin(); it != objID.end();
-         it++) { // std::cout<<"Inside the for loop\n";
+    for (auto it = objID.begin(); it != objID.end(); it++) { // std::cout<<"Inside the for loop\n";
 
       switch (i) {
         std::cout << "Inside the switch case\n";
