@@ -468,61 +468,19 @@ void MultipleObjectTrackingLidar::cloud_cb(const sensor_msgs::msg::PointCloud2::
     // cc_pos.publish(cc);// Publish cluster mid-points.
     kft(cc);
 
-	// TODO: fix publishers
-    int i = 0;
-    bool publishedCluster[6];
-    for (auto it = objID.begin(); it != objID.end(); it++) { // std::cout<<"Inside the for loop\n";
+	// merge all cluster point clouds and publish
+	pcl::PointCloud<pcl::PointXYZ>::Ptr merged_clouds(new pcl::PointCloud<pcl::PointXYZ>);
+	for(auto cloud : cluster_vec){
+	  (*merged_clouds) += (*cloud);
+	}
+	publish_cloud(pub_cluster_points, merged_clouds);
 
-      switch (i) {
-        std::cout << "Inside the switch case\n";
-      case 0: {
-        publish_cloud(pub_cluster0, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
-        i++;
-        break;
-      }
-      case 1: {
-        publish_cloud(pub_cluster1, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
-        i++;
-        break;
-      }
-      case 2: {
-        publish_cloud(pub_cluster2, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
-        i++;
-        break;
-      }
-      case 3: {
-        publish_cloud(pub_cluster3, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
-        i++;
-        break;
-      }
-      case 4: {
-        publish_cloud(pub_cluster4, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
-        i++;
-        break;
-      }
-
-      case 5: {
-        publish_cloud(pub_cluster5, cluster_vec[*it]);
-        publishedCluster[i] =
-            true; // Use this flag to publish only once for a given obj ID
-        i++;
-        break;
-      }
-      default:
-        break;
-      }
-    }
-  }
+	// merge all centroid points and publish
+	pcl::PointCloud<pcl::PointXYZ>::Ptr merged_centers(new pcl::PointCloud<pcl::PointXYZ>);
+	for(auto centroid : clusterCentroids){
+	  (*merged_centers) += centroid;
+	}
+	publish_cloud(pub_cluster_centroids, merged_centers);
 }
 
 }
