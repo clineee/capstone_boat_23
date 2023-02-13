@@ -4,6 +4,10 @@ install dependencies:
 
 `rosdep install --from-path src`
 
+If that gives you issues try:
+
+`rosdep install --from-paths src --ignore-src -r -y --rosdistro humble`
+
 You might need to do other stuff to init rosdep first, google it
 to build:
 
