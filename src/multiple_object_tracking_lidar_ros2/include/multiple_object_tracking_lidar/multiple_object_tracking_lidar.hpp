@@ -21,22 +21,6 @@
 namespace multiple_object_tracking_lidar
 {
 
-// KF init
-int stateDim = 4; // [x,y,v_x,v_y]//,w,h]
-int measDim = 2;  // [z_x,z_y,z_w,z_h]
-int ctrlDim = 0;
-cv::KalmanFilter KF0(stateDim, measDim, ctrlDim, CV_32F);
-cv::KalmanFilter KF1(stateDim, measDim, ctrlDim, CV_32F);
-cv::KalmanFilter KF2(stateDim, measDim, ctrlDim, CV_32F);
-cv::KalmanFilter KF3(stateDim, measDim, ctrlDim, CV_32F);
-cv::KalmanFilter KF4(stateDim, measDim, ctrlDim, CV_32F);
-cv::KalmanFilter KF5(stateDim, measDim, ctrlDim, CV_32F);
-
-/*
-cv::Mat state(stateDim, 1, CV_32F);
-cv::Mat_<float> measurement(2, 1);
-*/
-
 class MultipleObjectTrackingLidar : public rclcpp::Node{
 public:
     MultipleObjectTrackingLidar(
@@ -59,20 +43,21 @@ private:
                             // measurement.setTo(Scalar(0));
 
     std::vector<cv::KalmanFilter> kalman_filters;
-    bool firstFrame = true;
     rclcpp::Clock::SharedPtr clock_;
     std::string frame_id;
     std::string filtered_cloud;
 
-    static double euclidean_distance(geometry_msgs::msg::Point &p1, geometry_msgs::msg::Point &p2);
-    std::pair<int, int> findIndexOfMin(std::vector<std::vector<float>> distMat);
-    void kft(const std_msgs::msg::Float32MultiArray ccs);
-    void publish_cloud(rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr &pub, pcl::PointCloud<pcl::PointXYZ>::Ptr cluster);
+    static double euclidean_distance(const pcl::PointXYZ &p1, const pcl::PointXYZ &p2);
+    static std::pair<int, int> findIndexOfMin(std::vector<std::vector<double>> distMat);
+    void publish_cloud(rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr &pub, const pcl::PointCloud<pcl::PointXYZ>::Ptr& cluster);
     void cloud_cb(const sensor_msgs::msg::PointCloud2::ConstPtr &input);
 
-	void init_kfs(const std::vector<pcl::PointXYZ>& clusterCentroids);
   	static cv::KalmanFilter init_kf(float x, float y);
   	static std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> process_point_cloud(const sensor_msgs::msg::PointCloud2::ConstPtr& input);
+  	static std::vector<pcl::PointXYZ> findCentroids(const std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> &cluster_vec);
+  	void assign_object_id(const std::vector<pcl::PointXYZ> &kf_preds, const std::vector<pcl::PointXYZ> &cluster_centers);
+  	std::vector<pcl::PointXYZ> get_kf_preds();
+  	void correct_kfs(const std::vector<pcl::PointXYZ> &clusterCenters);
 };
 
 }
