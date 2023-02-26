@@ -924,6 +924,15 @@
         <pose>0 0 10 0 -0 0</pose>
       </light>
     </state>
+
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>33.83</latitude_deg>
+      <longitude_deg>-84.42</longitude_deg>
+      <elevation>254.99568</elevation>
+      <heading_deg>180</heading_deg>
+    </spherical_coordinates>
+
     <gui fullscreen='0'>
       <camera name='user_camera'>
         <pose>-15.5892 0.392985 21.6628 0 0.851642 0.028194</pose>

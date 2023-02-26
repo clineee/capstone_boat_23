@@ -242,7 +242,47 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /map_updates
       Use Timestamp: false
-      Value: true
+      # #global cost map
+      # Alpha: 0.699999988079071
+      # Class: nav2_rviz_plugins/GlobalCostmap
+      # Color Scheme: costmap
+      # Draw Behind: false
+      # Enabled: true
+      # Name: Map
+      # Topic:
+      #   Depth: 5
+      #   Durability Policy: Volatile
+      #   History Policy: Keep Last
+      #   Reliability Policy: Reliable
+      #   Value: /global_costmap
+      # Update Topic:
+      #   Depth: 5
+      #   Durability Policy: Volatile
+      #   History Policy: Keep Last
+      #   Reliability Policy: Reliable
+      #   Value: /global_costmap/costmap_updates
+      # Use Timestamp: false
+      # #local cost map
+      # Alpha: 0.699999988079071
+      # Class: nav2_rviz_plugins/LocalCostmap
+      # Color Scheme: costmap
+      # Draw Behind: false
+      # Enabled: true
+      # Name: Map
+      # Topic:
+      #   Depth: 5
+      #   Durability Policy: Volatile
+      #   History Policy: Keep Last
+      #   Reliability Policy: Reliable
+      #   Value: /local_costmap
+      # Update Topic:
+      #   Depth: 5
+      #   Durability Policy: Volatile
+      #   History Policy: Keep Last
+      #   Reliability Policy: Reliable
+      #   Value: /local_costmap/costmap_updates
+      # Use Timestamp: false
+      # Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

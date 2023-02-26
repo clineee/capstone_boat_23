@@ -1,15 +1,9 @@
 import os
-
 from ament_index_python.packages import get_package_share_directory
-
-
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
-# from launch.actions import TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-
 from launch_ros.actions import Node
-
 
 
 def generate_launch_description():
@@ -19,7 +13,8 @@ def generate_launch_description():
     # !!! MAKE SURE YOU SET THE PACKAGE NAME CORRECTLY !!!
 
     package_name='articubot_one' #<--- CHANGE ME
-
+    pkg_share = get_package_share_directory(package_name)
+    robot_localization_file_path = os.path.join(pkg_share, 'config', 'ekf_with_gps.yaml') 
     rsp = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
                     get_package_share_directory(package_name),'launch','rsp.launch.py'
@@ -56,13 +51,44 @@ def generate_launch_description():
                         output='screen')
 
 
+  # Start the navsat transform node which converts GPS data into the world coordinate frame
+    start_navsat_transform_cmd = Node(
+    package='robot_localization',
+    executable='navsat_transform_node',
+    name='navsat_transform',
+    output='screen',
+    parameters=([robot_localization_file_path, 
+    {'use_sim_time': True}]),
+    remappings=[('imu', 'imu/data'),
+                ('gps/fix', 'gps/fix'), 
+                ('gps/filtered', 'gps/filtered'),
+                ('odometry/gps', 'odometry/gps'),
+                ('odometry/filtered', 'odometry/global')])
+    
 
-    # This helps to address race conditions on startup for the 
-    # controller managers. Note that we are exporting delayed_controller_manager_spawner
-    # instead of just diff_drive_spawner.
-    # delayed_controller_manager_spawner = TimerAction(
-    #     period=10.0,
-    #     actions=[
+  # map->odom transform
+    start_robot_localization_global_cmd = Node(
+    package='robot_localization',
+    executable='ekf_node',
+    name='ekf_filter_node_map',
+    output='screen',
+    parameters=[robot_localization_file_path, 
+    {'use_sim_time': True}],
+    remappings=[('odometry/filtered', 'odometry/global'),
+                ('/set_pose', '/initialpose')])
+
+
+  # odom->base_footprint transform
+    start_robot_localization_local_cmd = Node(
+    package='robot_localization',
+    executable='ekf_node',
+    name='ekf_filter_node_odom',
+    output='screen',
+    parameters=[ robot_localization_file_path, 
+    {'use_sim_time': True}],
+    remappings=[('odometry/filtered', 'odometry/local'),
+                ('/set_pose', '/initialpose')])
+
     diff_drive_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -74,27 +100,6 @@ def generate_launch_description():
         executable="spawner",
         arguments=["joint_broad"],
     )
-    #     ],
-    # )
-
-
-    # Code for delaying a node (I haven't tested how effective it is)
-    # 
-    # First add the below lines to imports
-    # from launch.actions import RegisterEventHandler
-    # from launch.event_handlers import OnProcessExit
-    #
-    # Then add the following below the current diff_drive_spawner
-    # delayed_diff_drive_spawner = RegisterEventHandler(
-    #     event_handler=OnProcessExit(
-    #         target_action=spawn_entity,
-    #         on_exit=[diff_drive_spawner],
-    #     )
-    # )
-    #
-    # Replace the diff_drive_spawner in the final return with delayed_diff_drive_spawner
-
-
 
     # Launch them all!
     return LaunchDescription([
@@ -105,4 +110,7 @@ def generate_launch_description():
         spawn_entity,
         diff_drive_spawner,
         joint_broad_spawner,
+        start_robot_localization_global_cmd,
+        start_robot_localization_local_cmd,
+        start_navsat_transform_cmd
     ])

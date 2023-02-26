@@ -1,4 +1,5 @@
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/config/drive_bot.rviz
+/home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/config/ekf_with_gps.yaml
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/config/empty.yaml
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/config/gaz_ros2_ctl_use_sim.yaml
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/config/gazebo_params.yaml
@@ -11,8 +12,6 @@
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/config/twist_mux.yaml
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/config/view_bot.rviz
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/description/camera.xacro
-/home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/description/depth_camera.xacro
-/home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/description/face.xacro
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/description/gazebo_control.xacro
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/description/inertial_macros.xacro
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/description/lidar.xacro

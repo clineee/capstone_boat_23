@@ -184,4 +184,135 @@
         <mu2 value="0.001"/>
     </gazebo>
 
+
+ <!-- *********************** IMU SENSOR SETUP **************************  -->
+<!-- IMU Link -->
+
+<joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+</joint>
+
+  <gazebo reference="imu_link">
+    <gravity>true</gravity>
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <topic>__default_topic__</topic>
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+        <topicName>imu_data</topicName>
+        <bodyName>imu_link</bodyName>
+        <updateRateHZ>10.0</updateRateHZ>
+        <gaussianNoise>0.0</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_link</frameName>
+        <initialOrientationAsReference>false</initialOrientationAsReference>
+      </plugin>
+      <pose>0 0 0 0 0 0</pose>
+    </sensor>
+  </gazebo>
+
+<link name="imu_link">
+  <inertial>
+    <mass value="0.01"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+  </inertial>
+  <sensor name="bmb_imu" type="imu">
+    <imu>
+      <orientation>
+        <x>
+          <noise type="gaussian" mean="0.0" stddev="2e-3"/>
+        </x>
+        <y>
+          <noise type="gaussian" mean="0.0" stddev="2e-3"/>
+        </y>
+        <z>
+          <noise type="gaussian" mean="0.0" stddev="2e-3"/>
+        </z>
+      </orientation>
+      <angular_velocity>
+        <x>
+          <noise type="gaussian" mean="0.0" stddev="2e-4"/>
+        </x>
+        <y>
+          <noise type="gaussian" mean="0.0" stddev="2e-4"/>
+        </y>
+        <z>
+          <noise type="gaussian" mean="0.0" stddev="2e-4"/>
+        </z>
+      </angular_velocity>
+      <linear_acceleration>
+        <x>
+          <noise type="gaussian" mean="0.0" stddev="1.7e-2"/>
+        </x>
+        <y>
+          <noise type="gaussian" mean="0.0" stddev="1.7e-2"/>
+        </y>
+        <z>
+          <noise type="gaussian" mean="0.0" stddev="1.7e-2"/>
+        </z>
+      </linear_acceleration>
+    </imu>
+    <plugin name="articubot_imu" filename="libgazebo_ros_imu_sensor.so">
+      <ros>
+        <namespace>/imu</namespace>
+        <remapping>~/out:=data</remapping>
+      </ros>
+    </plugin>
+  </sensor>
+</link> 
+
+
+<!-- GPS Link --> 
+ <joint name="gps_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="gps_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+</joint>
+
+<gazebo reference="gps_link">
+    <sensor name="gps_sensor" type="gps">
+        <always_on>true</always_on>
+        <update_rate>1.0</update_rate>
+        <plugin name="gps_controller" filename="libgazebo_ros_gps_sensor.so">
+            <ros>
+                <!-- <namespace>/br</namespace> -->
+                <remapping>gps_controller/out:=gps</remapping>
+            </ros>
+            <frame_name>gps_link</frame_name>
+        </plugin>
+    </sensor>
+    <material>Gazebo/Grey</material>
+</gazebo>
+
+<link name="gps_link">
+  <inertial>
+    <mass value="0.01"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+  </inertial>
+  <sensor name="bmb_gps" type="gps">
+    <gps>
+      <position_sensing>
+        <horizontal>
+          <noise type="gaussian" mean="0.0" stddev="1e-2"/>
+        </horizontal>
+        <vertical>
+          <noise type="gaussian" mean="0.0" stddev="1"/>
+        </vertical>
+      </position_sensing>
+    </gps>
+    <plugin name="articubot_gps" filename="libgazebo_ros_gps_sensor.so">
+      <ros>
+        <remapping>~/out:=gps/fix</remapping>
+      </ros>
+    </plugin>
+  </sensor>
+</link>
+
+
 </robot>

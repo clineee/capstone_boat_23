@@ -1,0 +1,1 @@
+/home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/articubot_one/launch/launch_sim_gps.launch.py
