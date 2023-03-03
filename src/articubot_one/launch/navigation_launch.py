@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os
-
+import launch
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
@@ -26,11 +26,10 @@ from nav2_common.launch import RewrittenYaml
 def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('articubot_one')
-
     namespace = LaunchConfiguration('namespace')
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
-    params_file = LaunchConfiguration('params_file')
+    params_file = os.path.join(get_package_share_directory('articubot_one'),'config','nav2_params.yaml')
     default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
     map_subscribe_transient_local = LaunchConfiguration('map_subscribe_transient_local')
 
@@ -63,6 +62,9 @@ def generate_launch_description():
             convert_types=True)
 
     return LaunchDescription([
+        launch.actions.TimerAction(
+        period=5.0,
+        actions=[
         # Set env var to print messages to stdout immediately
         SetEnvironmentVariable('RCUTILS_LOGGING_BUFFERED_STREAM', '1'),
 
@@ -141,5 +143,5 @@ def generate_launch_description():
             parameters=[{'use_sim_time': use_sim_time},
                         {'autostart': autostart},
                         {'node_names': lifecycle_nodes}]),
-
+        ])
     ])

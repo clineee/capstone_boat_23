@@ -335,11 +335,14 @@ navsat_transform:
     use_sim_time: true
     frequency: 10.0
     delay: 3.0
-    magnetic_declination_radians: 0.2576106
+    magnetic_declination_radians: 0.22916173
     #either zero or pi/2 dependent on imu reading
     yaw_offset: 0.0 
     zero_altitude: true
-    broadcast_utm_transform: true
+    use_local_cartesian: true
+    broadcast_cartesian_transform: true
     publish_filtered_gps: true
     use_odometry_yaw: false
-    #wait_for_datum: false
+    wait_for_datum: true
+#     datum: {geo_pose: {position: {latitude: 44.5646, longitude: 123.2620, altitude: 71.6}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}
+    datum: [37.774929, -122.419416, 0.0]

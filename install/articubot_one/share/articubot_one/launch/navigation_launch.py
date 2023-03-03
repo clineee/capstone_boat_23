@@ -1,1 +1,1 @@
-/home/samueljadzak/capstone/restart_ws/src/articubot_one/launch/navigation_launch.py
+/home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/articubot_one/launch/navigation_launch.py

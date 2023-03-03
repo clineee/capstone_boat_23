@@ -4,7 +4,13 @@ from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
-
+from geographic_msgs.msg import GeoPose
+# from robot_localization.srv import *
+# import rclpy
+from rclpy import *
+# import sys
+from launch.actions import RegisterEventHandler
+from launch.event_handlers import OnProcessExit
 
 def generate_launch_description():
 
@@ -20,6 +26,7 @@ def generate_launch_description():
                     get_package_share_directory(package_name),'launch','rsp.launch.py'
                 )]), launch_arguments={'use_sim_time': 'true'}.items()
     )
+
 
     joystick = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
@@ -101,6 +108,19 @@ def generate_launch_description():
         arguments=["joint_broad"],
     )
 
+    nav = IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory(package_name),'launch','navigation_launch.py'
+                )])
+                , launch_arguments= {'use_sim_time': 'true'}.items()
+    )
+
+    delayed_nav = RegisterEventHandler(
+        event_handler=OnProcessExit(
+            target_action=spawn_entity,
+            on_exit=[nav],
+        )
+    )
     # Launch them all!
     return LaunchDescription([
         rsp,
@@ -112,5 +132,20 @@ def generate_launch_description():
         joint_broad_spawner,
         start_robot_localization_global_cmd,
         start_robot_localization_local_cmd,
-        start_navsat_transform_cmd
+        start_navsat_transform_cmd,
+        delayed_nav
     ])
+
+
+
+# newMapPose = "{geo_pose: {position: {latitude: 33.83, longitude: -84.42, altitude: 254.99568}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
+# rclpy.init(args=sys.argv)
+# node = rclpy.create_node('asdf')
+
+# _datum = node.create_client('_datum', datum)
+# rclpy.client.wait_for_service('datum')
+# try:
+#     geo_pose = rclpy.ServiceProxy('datum', SetDatum)
+#     response = geo_pose(newMapPose)
+# except rclpy.ServiceException as e:
+#     rclpy.loginfo ("Service call failed: %s"%e)
