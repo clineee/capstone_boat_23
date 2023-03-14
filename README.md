@@ -1,29 +1,23 @@
-Guide to getting the LIDAR 
 
-install dependencies:
+# AVVS Capstone
 
-`rosdep install --from-path src`
+The Autonomous Vessel Vision System is designed to take a pre-existing oceanic research vessel owned by the Oregon State University College of Earth, Ocean, and Atmospheric Sciences and make it autonomous. The vessel this system is going to be used in is meant for studying the interactions of salt-fresh water interfaces, often in areas with irregular magnetic fields making standard radio control systems difficult to operate. So the system needs to be able to identify and navigate around glaciers, other boats, and contend with currents and winds without constant communication with the researchers overseeing it.
 
-If that gives you issues try:
+The 2022 computer science capstone group has taken the work camera based object detection done by a 2020 capstone group and have added a lidar sensor and improved mapping to implement a pathfinding algorithm intended to content with the real world conditions. To help with testing and simulation the 2022 group is using Robot Operating System 2 (ROS2), a professional open source toolchain, to do simulation and development.
 
-`rosdep install --from-paths src --ignore-src -r -y --rosdistro humble`
+To make a robust system the 2022 group is using code from the 2020 group, original code, and ROS2 packages. In addition, some of the ROS2 packages needed to be updated and refactored by the group to work with maintained versions of ROS2.
 
-You might need to do other stuff to init rosdep first, google it
-to build:
+In the current build there are systems for detecting objects with lidar, cameras, as well as mapping and pathfinding. The sensor systems are not integrated with the mapping and pathfinding quite yet, and the pathfinding is still the ROS2 basic parameters and needs to be more finely tuned.
+## Authors
 
-`source /opt/ros/humble/local_setup.bash`
+- [Parker Carlson](https://www.github.com/thefxperson)
+- [Sammy Jazdak]("https://www.github.com/SamuelJazdak2")
+- [Ethan Cline]("https://www.github.com/clineee")
 
-In the main directory (capstone_boat_23)
 
-`colcon build`
+## Acknowledgements
 
-`source install/setup.bash`
+ - [Johnathan Nash](nashj@oregonstate.edu)
+ - [Jasmine Nahorniak](jasmine.nahorniak@oregonstate.edu)
 
-If you use a different shell (csh, ect) there are different scrupts
-to run my stuff:
 
-`ros2 launch multiple_object_tracking_lidar multiple_object_tracking_lidar.launch.py`
-
-`ros2 run lidar_faker faker`
-
-To run anything, you need to do both of the source commands first
