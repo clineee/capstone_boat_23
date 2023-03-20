@@ -11,8 +11,8 @@ In the current build there are systems for detecting objects with lidar, cameras
 ## Authors
 
 - [Parker Carlson](https://www.github.com/thefxperson)
-- [Sammy Jazdak]("https://www.github.com/SamuelJazdak2")
-- [Ethan Cline]("https://www.github.com/clineee")
+- [Sammy Jazdak](https://www.github.com/SamuelJazdak2)
+- [Ethan Cline](https://www.github.com/clineee)
 
 
 ## Acknowledgements
