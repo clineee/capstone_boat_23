@@ -8,14 +8,12 @@ To make a robust system the 2022 group is using code from the 2020 group, origin
 In the current build there are systems for detecting objects with lidar, cameras, as well as mapping and pathfinding. The sensor systems are not integrated with the mapping and pathfinding quite yet, and the pathfinding is still the ROS2 basic parameters and needs to be more finely tuned.
 
 Future goals include:
+```
 	-Improved navigation
-	
-	-Total system integration of all modules
-	
+	-Total system integration of all modules	
 	-Improved documentation
-	
 	-Real world testing of the system
-
+```
 ## Authors
 
 - [Parker Carlson](https://www.github.com/thefxperson)
