@@ -9,8 +9,11 @@ In the current build there are systems for detecting objects with lidar, cameras
 
 Future goals include:
 	-Improved navigation
+	
 	-Total system integration of all modules
+	
 	-Improved documentation
+	
 	-Real world testing of the system
 
 ## Authors
