@@ -18,6 +18,9 @@
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/description/robot.urdf.xacro
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/description/robot_core.xacro
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/description/ros2_control.xacro
+/home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/launch/.vscode/c_cpp_properties.json
+/home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/launch/.vscode/settings.json
+/home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/launch/__pycache__/robot_navigator.cpython-310.pyc
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/launch/camera.launch.py
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/launch/gpswaypointfollower.py
 /home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/articubot_one/share/articubot_one/launch/joystick.launch.py

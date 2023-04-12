@@ -339,10 +339,10 @@ navsat_transform:
     #either zero or pi/2 dependent on imu reading
     yaw_offset: 0.0 
     zero_altitude: true
-    use_local_cartesian: true
+# use_local_cartesian: true
     broadcast_cartesian_transform: true
     publish_filtered_gps: true
     use_odometry_yaw: false
     wait_for_datum: true
-#     datum: {geo_pose: {position: {latitude: 44.5646, longitude: 123.2620, altitude: 71.6}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}
     datum: [37.774929, -122.419416, 0.0]
+    
