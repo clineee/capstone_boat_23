@@ -8,7 +8,7 @@ from geometry_msgs.msg import PoseStamped
 from robot_localization.srv import FromLL, ToLL
 from robot_navigator import BasicNavigator, NavigationResult
 
-
+# need to publish the next pose gps data out to garmin autopilot
 class GPSPublisher(Node):
     def __init__(self):
         super().__init__('gps_publisher')
@@ -26,7 +26,7 @@ class GPSPublisher(Node):
         msg.data = "Publishing!"
         self.publisher.publish(msg)
 
-
+# subscribes to nav2 path topic indexing the next pose in the navigation path
 class PathSubscriber(Node):
     def __init__(self):
         super().__init__('path_subscriber')
@@ -56,7 +56,7 @@ def get_gps_points():
         print(gps_points)
     return gps_points
 
-
+#converts gps waypoints to map points using robot_localization FromLL service
 def convert_from_LL(gps_points):
     node = Node("my_node")
     client = node.create_client(FromLL, "/fromLL")
@@ -104,13 +104,15 @@ def main():
         #while robot is navigating do something else, in this case read 
         # back distance to goal in meters using distance_remaining feedback
         i = 0
+        response = None
 
         path_subscriber = PathSubscriber()
         gps_publisher = GPSPublisher()
-
+        #starts the ToLL service from navsat transform node
         node = Node("my_node2")
         client = node.create_client(ToLL, "/toLL")
         request = ToLL.Request()
+
 
         while not nav.isNavComplete():
             i += 1
@@ -123,16 +125,15 @@ def main():
             request.map_point.x = gps_pose.pose.position.x
             request.map_point.y = gps_pose.pose.position.y
             request.map_point.z = 0.0
-            print("Map position x: ", gps_pose.pose.position.x)
-            print("Map position y: ",gps_pose.pose.position.y)
 
             future = client.call_async(request)
             rclpy.spin_until_future_complete(node, future)
 
             if future.result() is not None:
-                response = future.result()
-                print("Lat from Toll ", response.ll_point.latitude)
-                print("Long from Toll ",response.ll_point.longitude)
+                if response != future.result():
+                    response = future.result()
+                    print("Lat from Toll ", response.ll_point.latitude)
+                    print("Long from Toll ",response.ll_point.longitude)
             else:
                 print("Service call failed")
                 continue

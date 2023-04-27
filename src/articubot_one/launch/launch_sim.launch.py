@@ -5,10 +5,7 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from geographic_msgs.msg import GeoPose
-# from robot_localization.srv import *
-# import rclpy
 from rclpy import *
-# import sys
 from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 
@@ -57,6 +54,18 @@ def generate_launch_description():
                                    '-entity', 'my_bot'],
                         output='screen')
 
+    #Currently not fused into EKF due to errors in icp when out of range of features.
+    #Need to write wrapper to handle restarting the node when too many errors occur.
+    laser_scan_matcher = Node(
+    package='ros2_laser_scan_matcher',
+    executable='laser_scan_matcher',
+    name='laser_scan_matcher',
+    output='screen',
+    parameters=[{
+        'laser_frame': 'laser_frame',
+        'publish_odom': '/scanmatcherout',
+        'use_sim_time': True}])
+
 
   # Start the navsat transform node which converts GPS data into the world coordinate frame
     start_navsat_transform_cmd = Node(
@@ -64,14 +73,14 @@ def generate_launch_description():
     executable='navsat_transform_node',
     name='navsat_transform',
     output='screen',
-    parameters=([robot_localization_file_path, 
-    {'use_sim_time': True}]),
-    remappings=[('imu', 'imu/data'),
-                ('gps/fix', 'gps/fix'), 
-                ('gps/filtered', 'gps/filtered'),
-                ('odometry/gps', 'odometry/gps'),
+    parameters=[robot_localization_file_path, 
+    {'use_sim_time': True}],
+    remappings=[
+                ('/gps/fix','/gps/out'), 
+                ('/imu/data', '/imu/out'),
                 ('odometry/filtered', 'odometry/global')])
-    
+
+
 
   # map->odom transform
     start_robot_localization_global_cmd = Node(
@@ -79,8 +88,7 @@ def generate_launch_description():
     executable='ekf_node',
     name='ekf_filter_node_map',
     output='screen',
-    parameters=[robot_localization_file_path, 
-    {'use_sim_time': True}],
+    parameters=[robot_localization_file_path],
     remappings=[('odometry/filtered', 'odometry/global'),
                 ('/set_pose', '/initialpose')])
 
@@ -91,9 +99,8 @@ def generate_launch_description():
     executable='ekf_node',
     name='ekf_filter_node_odom',
     output='screen',
-    parameters=[ robot_localization_file_path, 
-    {'use_sim_time': True}],
-    remappings=[('odometry/filtered', 'odometry/local'),
+    parameters=[ robot_localization_file_path],
+    remappings=[('odometry/filtered', '/odom'),
                 ('/set_pose', '/initialpose')])
 
     diff_drive_spawner = Node(
@@ -121,6 +128,7 @@ def generate_launch_description():
             on_exit=[nav],
         )
     )
+
     # Launch them all!
     return LaunchDescription([
         rsp,
@@ -130,22 +138,9 @@ def generate_launch_description():
         spawn_entity,
         diff_drive_spawner,
         joint_broad_spawner,
+        # laser_scan_matcher,
         start_robot_localization_global_cmd,
         start_robot_localization_local_cmd,
         start_navsat_transform_cmd,
         delayed_nav
     ])
-
-
-
-# newMapPose = "{geo_pose: {position: {latitude: 33.83, longitude: -84.42, altitude: 254.99568}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}"
-# rclpy.init(args=sys.argv)
-# node = rclpy.create_node('asdf')
-
-# _datum = node.create_client('_datum', datum)
-# rclpy.client.wait_for_service('datum')
-# try:
-#     geo_pose = rclpy.ServiceProxy('datum', SetDatum)
-#     response = geo_pose(newMapPose)
-# except rclpy.ServiceException as e:
-#     rclpy.loginfo ("Service call failed: %s"%e)

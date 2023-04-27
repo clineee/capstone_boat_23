@@ -64,6 +64,7 @@ class BasicNavigator(Node):
         self.compute_path_through_poses_client = ActionClient(self, ComputePathThroughPoses,
                                                               'compute_path_through_poses')
         #changed amcl topic to global odom ekf for localization through robot_localization package
+        #basically the only change you have to make to nav2 for the simple commander to work
         self.localization_pose_sub = self.create_subscription(PoseWithCovarianceStamped,
                                                               'odometry/global',
                                                               self._amclPoseCallback,

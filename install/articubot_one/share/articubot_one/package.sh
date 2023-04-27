@@ -79,6 +79,8 @@ _colcon_package_sh_source_script() {
 
 # source sh hooks
 _colcon_package_sh_source_script "$COLCON_CURRENT_PREFIX/share/articubot_one/hook/cmake_prefix_path.sh"
+_colcon_package_sh_source_script "$COLCON_CURRENT_PREFIX/share/articubot_one/hook/path.sh"
+_colcon_package_sh_source_script "$COLCON_CURRENT_PREFIX/share/articubot_one/hook/pythonscriptspath.sh"
 _colcon_package_sh_source_script "$COLCON_CURRENT_PREFIX/share/articubot_one/local_setup.sh"
 
 unset _colcon_package_sh_source_script

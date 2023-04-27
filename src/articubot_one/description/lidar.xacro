@@ -4,10 +4,12 @@
     <joint name="laser_joint" type="fixed">
         <parent link="chassis"/>
         <child link="laser_frame"/>
+        <!-- <child link="laser"/> -->
         <origin xyz="0.122 0 0.212" rpy="0 0 0"/>
     </joint>
 
     <link name="laser_frame">
+    <!-- <link name="laser"> -->
         <visual>
             <geometry>
                 <cylinder radius="0.05" length="0.04"/>
@@ -34,6 +36,7 @@
 
 
     <gazebo reference="laser_frame">
+    <!-- <gazebo reference="laser"> -->
         <material>Gazebo/Black</material>
 
         <sensor name="laser" type="ray">
@@ -59,6 +62,7 @@
                 </ros>
                 <output_type>sensor_msgs/LaserScan</output_type>
                 <frame_name>laser_frame</frame_name>
+                <!-- <frame_name>laser</frame_name> -->
             </plugin>
         </sensor>
     </gazebo>

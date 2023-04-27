@@ -40,6 +40,7 @@ install(
 install(PROGRAMS
   launch/gpswaypointfollower.py
   launch/robot_navigator.py
+  DESTINATION bin
 )
 
 

@@ -82,10 +82,11 @@
     <wind/>
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
-      <latitude_deg>0</latitude_deg>
-      <longitude_deg>0</longitude_deg>
-      <elevation>0</elevation>
-      <heading_deg>0</heading_deg>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>37.774929</latitude_deg>
+      <longitude_deg>-122.419416</longitude_deg>
+      <elevation>0.0</elevation>
+      <heading_deg>180</heading_deg>
     </spherical_coordinates>
     <model name='Construction Barrel'>
       <link name='link'>
@@ -924,15 +925,6 @@
         <pose>0 0 10 0 -0 0</pose>
       </light>
     </state>
-
-    <spherical_coordinates>
-      <surface_model>EARTH_WGS84</surface_model>
-      <world_frame_orientation>ENU</world_frame_orientation>
-      <latitude_deg>37.774929</latitude_deg>
-      <longitude_deg>-122.419416</longitude_deg>
-      <elevation>0.0</elevation>
-      <heading_deg>180</heading_deg>
-    </spherical_coordinates>
 
     <gui fullscreen='0'>
       <camera name='user_camera'>

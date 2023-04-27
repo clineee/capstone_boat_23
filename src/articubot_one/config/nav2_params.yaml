@@ -4,7 +4,9 @@ bt_navigator:
     use_sim_time: True
     global_frame: map
     robot_base_frame: base_link
-    odom_topic: /diff_cont/odom
+    # odom_topic: /diff_cont/odom
+    # odom_topic: /odometry/global
+    odom_topic: "/odom"
     enable_groot_monitoring: True
     groot_zmq_publisher_port: 1666
     groot_zmq_server_port: 1667
@@ -61,6 +63,7 @@ bt_navigator:
 controller_server:
   ros__parameters:
     use_sim_time: True
+    odom_topic: "/odom"
     controller_frequency: 20.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
@@ -133,6 +136,7 @@ local_costmap:
       update_frequency: 1.0
       publish_frequency: 1.0
       global_frame: odom
+      # global_frame: map
       robot_base_frame: base_link
       use_sim_time: True
       rolling_window: true
@@ -180,7 +184,7 @@ global_costmap:
       robot_base_frame: base_link
       use_sim_time: True
       robot_radius: 0.35
-      resolution: 0.25
+      resolution: 0.10
       rolling_window: True
       width: 80
       height: 80

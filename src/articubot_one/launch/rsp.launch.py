@@ -29,9 +29,6 @@ def generate_launch_description():
         executable='robot_state_publisher',
         output='screen',
         parameters=[params],
-        #potentially necessary remappings? -Sam
-        # remappings=[('odometry/filtered', 'odometry/global'),
-        #         ('/set_pose', '/initialpose')]
     )
 
 
