@@ -250,13 +250,26 @@ cv::KalmanFilter MultipleObjectTrackingLidar::init_kf(float x, float y) {
 std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> MultipleObjectTrackingLidar::process_point_cloud(const sensor_msgs::msg::PointCloud2::ConstPtr &input) {
   // create placeholder objects
   pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::PointCloud<pcl::PointXYZ>::Ptr clustered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
 
   // fill point cloud with data
   pcl::fromROSMsg(*input, *input_cloud);
-  tree->setInputCloud(input_cloud);
 
+  // adjust point location using IMU data
+  // create 3d rotation matrix using Eigen
+  // TODO: create subscriber for IMU data in launch function. Store latest roll, pitch, yaw in this.roll, ect. as a float
+  // TODO: then, uncomment these lines
+  /*Eigen::Affine3f IMU_rotation = Eigen::Affine3f::Identity();
+
+  IMU_rotation.translation << 0.0, 0.0, 0.0;					// do not translate the points
+  IMU_rotation.rotate(Eigen::AngleAxisf(this.roll, Eigen::Vector3d::UnitX()) * Eigen::AngleAxisf(this.pitch, Eigen::Vector3d::UnitY()) * Eigen::AngleAxisf(this.yaw, Eigen::Vector3d::UnitZ()));
+
+  pcl::transformPointCloud(*input_cloud, *transformed_cloud, IMU_rotation);*/
+
+  // identify clusters using k-D tree
+  tree->setInputCloud(input_cloud);
   std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
   ec.setClusterTolerance(0.08);
@@ -264,6 +277,8 @@ std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> MultipleObjectTrackingLidar::pr
   ec.setMaxClusterSize(600);
   ec.setSearchMethod(tree);
   ec.setInputCloud(input_cloud);
+  //ec.setInputCloud(transformed_cloud);			TODO: when IMU works, switch this and above line
+
   /* Extract the clusters out of pc and save indices in cluster_indices.*/
   ec.extract(cluster_indices);
 
