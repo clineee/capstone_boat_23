@@ -90,35 +90,45 @@ def main():
     global gps_pose
     gps_pose = None
 
+    # waypointslist = []
     nav = BasicNavigator()
     nav.waitUntilNav2Active()
+
+
+    # nav.followWaypoints(waypointslist)
+
+    # nav.goToPose(goal_pose)
+    #while robot is navigating do something else, in this case read 
+    # back distance to goal in meters using distance_remaining feedback
+    i = 0
+    response = None
+
+    path_subscriber = PathSubscriber()
+    gps_publisher = GPSPublisher()
+    #starts the ToLL service from navsat transform node
+    node = Node("my_node2")
+    client = node.create_client(ToLL, "/toLL")
+    request = ToLL.Request()
+
     for points in map_points:
         goal_pose = PoseStamped()
         goal_pose.header.frame_id = 'map'
         goal_pose.header.stamp = nav.get_clock().now().to_msg()
-        #pose is not needed because of planner parameter "use_final_approach_orientation: true"
         goal_pose.pose.position.x = points[0]
         goal_pose.pose.position.y = points[1]
         goal_pose.pose.position.z = 0.0
+        # goal_pose.pose.orientation.x = 0.0
+        # goal_pose.pose.orientation.y = 0.0
+        # goal_pose.pose.orientation.z = 0.0
+        goal_pose.pose.orientation.w = 1.0
+        
+        # waypointslist.append(goal_pose)
         nav.goToPose(goal_pose)
-        #while robot is navigating do something else, in this case read 
-        # back distance to goal in meters using distance_remaining feedback
-        i = 0
-        response = None
-
-        path_subscriber = PathSubscriber()
-        gps_publisher = GPSPublisher()
-        #starts the ToLL service from navsat transform node
-        node = Node("my_node2")
-        client = node.create_client(ToLL, "/toLL")
-        request = ToLL.Request()
-
-
         while not nav.isNavComplete():
             i += 1
-            feedback = nav.getFeedback()
-            if feedback and i % 5 == 0:
-                print('Distance remaining: ' + '{:.2f}'.format(feedback.distance_remaining) + ' meters.')
+            # feedback = nav.getFeedback()
+            # if feedback and i % 5 == 0:
+            #     print('Distance remaining: ' + '{:.2f}'.format(feedback.distance_remaining) + ' meters.')
 
             rclpy.spin_once(path_subscriber)
 
@@ -140,15 +150,15 @@ def main():
             rclpy.spin_once(gps_publisher)
 
 
-        result = nav.getResult()
-        if result == NavigationResult.SUCCEEDED:
-            print('Goal succeeded!')
-        elif result == NavigationResult.CANCELED:
-            print('Goal was canceled!')
-        elif result == NavigationResult.FAILED:
-            print('Goal failed!')
-        else:
-            print('Goal has an invalid return status!')
+    result = nav.getResult()
+    if result == NavigationResult.SUCCEEDED:
+        print('Goal succeeded!')
+    elif result == NavigationResult.CANCELED:
+        print('Goal was canceled!')
+    elif result == NavigationResult.FAILED:
+        print('Goal failed!')
+    else:
+        print('Goal has an invalid return status!')
     nav.lifecycleShutdown()
     rclpy.shutdown()
     exit(0)

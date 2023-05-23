@@ -87,7 +87,7 @@ controller_server:
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25
+      xy_goal_tolerance: 1.0
       yaw_goal_tolerance: 0.25
     # DWB parameters
     FollowPath:
@@ -143,7 +143,7 @@ local_costmap:
       width: 15
       height: 15
       resolution: 0.05
-      robot_radius: 0.35
+      robot_radius: 0.45
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
@@ -183,7 +183,7 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: True
-      robot_radius: 0.35
+      robot_radius: 0.45
       resolution: 0.10
       rolling_window: True
       width: 80
@@ -228,17 +228,18 @@ map_saver:
     occupied_thresh_default: 0.65
     map_subscribe_transient_local: True
 
+
+
 planner_server:
   ros__parameters:
-    use_sim_time: True
-    expected_planner_frequency: 20.0
-    planner_plugins: ["GridBased"]
+    planner_plugins: ['GridBased']
     GridBased:
-      plugin: "nav2_navfn_planner/NavfnPlanner"
-      use_final_approach_orientation: true
-      tolerance: 0.5
-      use_astar: true
-      allow_unknown: true
+      plugin: 'nav2_navfn_planner/NavfnPlanner'
+      use_astar: True
+      allow_unknown: True
+      tolerance: 1.0
+      use_final_approach_orientation: True
+
 
 
 behavior_server:

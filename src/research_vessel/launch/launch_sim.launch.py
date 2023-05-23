@@ -15,19 +15,12 @@ def generate_launch_description():
     # Include the robot_state_publisher launch file, provided by our own package. Force sim time to be enabled
     # !!! MAKE SURE YOU SET THE PACKAGE NAME CORRECTLY !!!
 
-    package_name='articubot_one' #<--- CHANGE ME
+    package_name='research_vessel' #<--- CHANGE ME
     pkg_share = get_package_share_directory(package_name)
     robot_localization_file_path = os.path.join(pkg_share, 'config', 'ekf_with_gps.yaml') 
     rsp = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
                     get_package_share_directory(package_name),'launch','rsp.launch.py'
-                )]), launch_arguments={'use_sim_time': 'true'}.items()
-    )
-
-
-    joystick = IncludeLaunchDescription(
-                PythonLaunchDescriptionSource([os.path.join(
-                    get_package_share_directory(package_name),'launch','joystick.launch.py'
                 )]), launch_arguments={'use_sim_time': 'true'}.items()
     )
 
@@ -60,11 +53,14 @@ def generate_launch_description():
     package='ros2_laser_scan_matcher',
     executable='laser_scan_matcher',
     name='laser_scan_matcher',
+    respawn=True,
     output='screen',
     parameters=[{
         'laser_frame': 'laser_frame',
         'publish_odom': '/scanmatcherout',
-        'use_sim_time': True}])
+        'use_sim_time': True,
+        'restart': 1,
+        'restart_threshold_mean_error': 0.01}])
 
 
   # Start the navsat transform node which converts GPS data into the world coordinate frame
@@ -132,13 +128,12 @@ def generate_launch_description():
     # Launch them all!
     return LaunchDescription([
         rsp,
-        joystick,
         twist_mux,
         gazebo,
         spawn_entity,
         diff_drive_spawner,
         joint_broad_spawner,
-        # laser_scan_matcher,
+        laser_scan_matcher,
         start_robot_localization_global_cmd,
         start_robot_localization_local_cmd,
         start_navsat_transform_cmd,

@@ -25,11 +25,11 @@ from nav2_common.launch import RewrittenYaml
 
 def generate_launch_description():
     # Get the launch directory
-    bringup_dir = get_package_share_directory('articubot_one')
+    bringup_dir = get_package_share_directory('research_vessel')
     namespace = LaunchConfiguration('namespace')
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
-    params_file = os.path.join(get_package_share_directory('articubot_one'),'config','nav2_params.yaml')
+    params_file = os.path.join(get_package_share_directory('research_vessel'),'config','nav2_params.yaml')
     default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
     map_subscribe_transient_local = LaunchConfiguration('map_subscribe_transient_local')
 
