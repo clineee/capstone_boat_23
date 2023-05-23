@@ -5,7 +5,7 @@ from launch_ros.actions import Node
 import launch
 
 ################### user configure parameters for ros2 start ###################
-frame_id        = 'map'
+frame_id        = 'laser'
 filtered_cloud  = 'filtered_cloud'
 stateDim        = 4 # [x,y,v_x,v_y]//,w,h]
 measDim         = 2 # [z_x,z_y,z_w,z_h]
