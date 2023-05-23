@@ -1,6 +1,7 @@
 # .gitignore for ROS2 taken from: https://gitcode.net/github/gitignore/-/blob/master/community/ROS2.gitignore
 install/
 log/
+logs/
 build/
 
 src/install/
@@ -18,8 +19,12 @@ src/build/
 # CLion
 .idea
 
+# VSCode
+.vscode
+
 # qcreator stuff
 CMakeLists.txt.user
+*cmake-build-debug/
 
 srv/_*.py
 *.pcd
@@ -35,4 +40,4 @@ qtcreator-*
 # Colcon custom files
 COLCON_IGNORE
 AMENT_IGNORE
-
+ament_package()

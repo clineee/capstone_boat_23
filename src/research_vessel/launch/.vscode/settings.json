@@ -1,0 +1,14 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/samueljadzak/capstone/restart_ws/capstone_boat_23/install/robot_localization/local/lib/python3.10/dist-packages",
+        "/home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/robot_localization/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/samueljadzak/capstone/restart_ws/capstone_boat_23/install/robot_localization/local/lib/python3.10/dist-packages",
+        "/home/samueljadzak/capstone/restart_ws/capstone_boat_23/src/install/robot_localization/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}

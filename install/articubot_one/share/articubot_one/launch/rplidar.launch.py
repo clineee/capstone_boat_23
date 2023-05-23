@@ -1,1 +1,0 @@
-/home/parker/Documents/Capstone/capstone_boat_23/src/articubot_one/launch/rplidar.launch.py
