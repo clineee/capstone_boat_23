@@ -1,1 +1,0 @@
-/home/samueljadzak/capstone/restart_ws/capstone_boat_23/build/articubot_one/ament_cmake_environment_hooks/local_setup.bash
