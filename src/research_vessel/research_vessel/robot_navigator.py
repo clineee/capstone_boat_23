@@ -23,6 +23,7 @@ from lifecycle_msgs.srv import GetState
 from nav2_msgs.action import NavigateThroughPoses, NavigateToPose, FollowWaypoints, ComputePathToPose, ComputePathThroughPoses
 from nav2_msgs.srv import LoadMap, ClearEntireCostmap, ManageLifecycleNodes, GetCostmap
 
+
 import rclpy
 
 from rclpy.action import ActionClient
@@ -63,12 +64,13 @@ class BasicNavigator(Node):
         self.compute_path_to_pose_client = ActionClient(self, ComputePathToPose, 'compute_path_to_pose')
         self.compute_path_through_poses_client = ActionClient(self, ComputePathThroughPoses,
                                                               'compute_path_through_poses')
-        #changed amcl topic to global odom ekf for localization through robot_localization package
-        #basically the only change you have to make to nav2 for the simple commander to work
+        #modified: changed amcl topic to global odom ekf for localization through robot_localization package
         self.localization_pose_sub = self.create_subscription(PoseWithCovarianceStamped,
-                                                              'odometry/global',
+                                                              'odom_to_pose',
                                                               self._amclPoseCallback,
                                                               amcl_pose_qos)
+        
+
         self.initial_pose_pub = self.create_publisher(PoseWithCovarianceStamped,
                                                       'initialpose',
                                                       10)

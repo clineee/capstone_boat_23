@@ -1,0 +1,23 @@
+digraph G {
+"wamv/wamv/base_link" -> "wamv/wamv/base_link/imu_wamv_sensor"[label=" Broadcaster: default_authority\nAverage rate: 250.218\nBuffer length: 4.584\nMost recent transform: 26.852\nOldest transform: 22.268\n"];
+"wamv/wamv/base_link" -> "wamv/wamv/base_link/navsat"[label=" Broadcaster: default_authority\nAverage rate: 250.218\nBuffer length: 4.584\nMost recent transform: 26.852\nOldest transform: 22.268\n"];
+"wamv/wamv/base_link" -> "wamv/wamv/base_link/lidar_wamv_sensor"[label=" Broadcaster: default_authority\nAverage rate: 250.218\nBuffer length: 4.584\nMost recent transform: 26.852\nOldest transform: 22.268\n"];
+"wamv/wamv/base_link" -> "wamv/wamv/base_link/contact_sensor"[label=" Broadcaster: default_authority\nAverage rate: 250.218\nBuffer length: 4.584\nMost recent transform: 26.852\nOldest transform: 22.268\n"];
+"wamv/wamv/base_link" -> "wamv/wamv/lidar_wamv_post_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"wamv/wamv/base_link" -> "wamv/wamv/cpu_cases_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"wamv/wamv/base_link" -> "wamv/wamv/gps_wamv_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"wamv/wamv/base_link" -> "wamv/wamv/imu_wamv_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"wamv/wamv/base_link" -> "wamv/wamv/left_battery_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"wamv/wamv/lidar_wamv_post_arm_link" -> "wamv/wamv/lidar_wamv_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"wamv/wamv/lidar_wamv_post_link" -> "wamv/wamv/lidar_wamv_post_arm_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"wamv/wamv/base_link" -> "wamv/wamv/right_battery_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"wamv/wamv/base_link" -> "wamv/wamv/left_engine_link"[label=" Broadcaster: default_authority\nAverage rate: 19.491\nBuffer length: 3.848\nMost recent transform: 26.828\nOldest transform: 22.98\n"];
+"wamv/wamv/left_engine_link" -> "wamv/wamv/left_propeller_link"[label=" Broadcaster: default_authority\nAverage rate: 19.491\nBuffer length: 3.848\nMost recent transform: 26.828\nOldest transform: 22.98\n"];
+"wamv/wamv/base_link" -> "wamv/wamv/right_engine_link"[label=" Broadcaster: default_authority\nAverage rate: 19.491\nBuffer length: 3.848\nMost recent transform: 26.828\nOldest transform: 22.98\n"];
+"wamv/wamv/right_engine_link" -> "wamv/wamv/right_propeller_link"[label=" Broadcaster: default_authority\nAverage rate: 19.491\nBuffer length: 3.848\nMost recent transform: 26.828\nOldest transform: 22.98\n"];
+"map" -> "odom"[label=" Broadcaster: default_authority\nAverage rate: 15.413\nBuffer length: 3.828\nMost recent transform: 26.796\nOldest transform: 22.968\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1693330453.0563936"[ shape=plaintext ] ;
+}->"map";
+}

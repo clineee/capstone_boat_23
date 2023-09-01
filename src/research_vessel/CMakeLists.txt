@@ -17,9 +17,16 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(robot_localization REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/PidDiagnose.msg"
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -33,14 +40,18 @@ if(BUILD_TESTING)
 endif()
 
 install(
-  DIRECTORY config description launch worlds
+  DIRECTORY config launch 
   DESTINATION share/${PROJECT_NAME}
 
 )
-install(PROGRAMS
-  launch/gpswaypointfollower.py
-  launch/robot_navigator.py
-  DESTINATION bin
+
+install(
+  PROGRAMS
+  research_vessel/robot_navigator.py
+  research_vessel/lidar_filter.py
+  research_vessel/gpswaypointfollower.py
+  research_vessel/topic_relay.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 

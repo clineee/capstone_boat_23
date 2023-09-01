@@ -38,7 +38,7 @@ class PathSubscriber(Node):
             10
         )
         self.subscription
-        self.next_pose = None;
+        self.next_pose = None
 
     def path_callback(self, msg):
         global gps_pose
@@ -126,9 +126,9 @@ def main():
         nav.goToPose(goal_pose)
         while not nav.isNavComplete():
             i += 1
-            # feedback = nav.getFeedback()
-            # if feedback and i % 5 == 0:
-            #     print('Distance remaining: ' + '{:.2f}'.format(feedback.distance_remaining) + ' meters.')
+            feedback = nav.getFeedback()
+            if feedback and i % 5 == 0:
+                print('Distance remaining: ' + '{:.2f}'.format(feedback.distance_remaining) + ' meters.')
 
             rclpy.spin_once(path_subscriber)
 
